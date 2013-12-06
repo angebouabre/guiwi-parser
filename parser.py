@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+""" """
+
 import os
 import json
 from parsersettings import GLOBAL_RESULT, SUCCESS_CODE_1, SUCCESS_CODE_2, FIXTURE_DIR, RAW_RESULTS_DIR
@@ -36,7 +38,7 @@ def getFields(filename, pk):
     for line in openedFile:
         if 'ALIAS' in line:
             test_name = line.split('=')[1].rstrip()
-        if 'DATE' in line:
+        if 'DATE' in line: #To rework because it  gets the last occurence 'DATE' in wrs file
             start_date = line.split('=')[1].rstrip()
     data={"fields":{"scenario_failed":"","error_code":0,"start_date":start_date,"file_report":filename,"test_name":test_name},"model":"stbattack.tasktest","pk":pk}
     if getErrorStep(filename):
@@ -59,11 +61,9 @@ def getFields(filename, pk):
                 fields_dict['video_report'] = 'https:%s'%(line.split('=https:')[1].rstrip())
         data['fields']=fields_dict
     data = json.dumps(data)
-    #else:
-        # Get all results ( success tests too)
     return str(data) 
 
-def call(DIR):
+def serialize(DIR):
     lines = '' 
     pk = 0 
     for filename in os.listdir(DIR):
@@ -73,11 +73,13 @@ def call(DIR):
             res = checkFile(filename)      
             line = getFields(filename, pk)
             lines = line + ',' + lines
-            #lines = json.dumps(lines)
+    "Making a table with the json data like django fixture"
     lines = '['+lines+']'
+    "SERIALIZING: Clean the the table in compliance with django fixture "
     lines = lines.replace("},]","}]")
     lines = lines.replace(",{}","")
     lines = lines.replace("{},","")
+    
     CUR_DIR = os.path.dirname(__file__)
     folder_fixture_path = os.path.join(CUR_DIR,FIXTURE_DIR)
     if not os.path.isdir(folder_fixture_path):
@@ -89,4 +91,4 @@ def call(DIR):
 
 
 DIR=os.path.join(os.path.dirname(__file__),os.pardir,RAW_RESULTS_DIR)
-call(DIR)
+serialize(DIR)
