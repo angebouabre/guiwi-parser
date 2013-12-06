@@ -2,7 +2,7 @@
 
 import os
 import json
-from parsersettings import GLOBAL_RESULT, SUCCESS_CODE_1, SUCCESS_CODE_2
+from parsersettings import GLOBAL_RESULT, SUCCESS_CODE_1, SUCCESS_CODE_2, FIXTURE_DIR, RAW_RESULTS_DIR
 
 def checkFile(filename):
     """ Check succes of task by global return in task report """
@@ -79,14 +79,14 @@ def call(DIR):
     lines = lines.replace(",{}","")
     lines = lines.replace("{},","")
     CUR_DIR = os.path.dirname(__file__)
-    folder_fixture_path = os.path.join(CUR_DIR, 'data/fixtures/')
+    folder_fixture_path = os.path.join(CUR_DIR,FIXTURE_DIR)
     if not os.path.isdir(folder_fixture_path):
         os.makedirs(folder_fixture_path)
-    fixture_path = os.path.join(CUR_DIR, 'data/fixtures/fixture2.json')
+    fixture_path = os.path.join(CUR_DIR, FIXTURE_DIR,'fixture.json')
     f = open(fixture_path,'w')
     f.write(lines)
     f.close()
 
 
-DIR=os.path.join(os.path.dirname(__file__),os.pardir,'13.2.7/2013/11/8')
+DIR=os.path.join(os.path.dirname(__file__),os.pardir,RAW_RESULTS_DIR)
 call(DIR)
