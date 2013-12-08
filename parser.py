@@ -63,11 +63,11 @@ def getFields(filename, pk):
     data = json.dumps(data)
     return str(data) 
 
-def serialize(DIR):
+def serialize(wrs_dir):
     lines = '' 
     pk = 0 
-    for filename in os.listdir(DIR):
-        filename = os.path.join(DIR,filename)
+    for filename in os.listdir(wrs_dir):
+        filename = os.path.join(wrs_dir,filename)
         if os.path.isfile(filename):
             pk += 1
             res = checkFile(filename)      
@@ -80,15 +80,11 @@ def serialize(DIR):
     lines = lines.replace(",{}","")
     lines = lines.replace("{},","")
     
-    CUR_DIR = os.path.dirname(__file__)
-    folder_fixture_path = os.path.join(CUR_DIR,FIXTURE_DIR)
-    if not os.path.isdir(folder_fixture_path):
-        os.makedirs(folder_fixture_path)
-    fixture_path = os.path.join(CUR_DIR, FIXTURE_DIR,'fixture.json')
-    f = open(fixture_path,'w')
+    if not os.path.isdir(FIXTURE_DIR):
+        os.makedirs(FIXTURE_DIR)
+    fixture_file = os.path.join(FIXTURE_DIR,'fixture.json')
+    f = open(fixture_file,'w')
     f.write(lines)
     f.close()
 
-
-DIR=os.path.join(os.path.dirname(__file__),os.pardir,RAW_RESULTS_DIR)
-serialize(DIR)
+serialize(RAW_RESULTS_DIR)
