@@ -44,9 +44,10 @@ def getFields(filename, pk):
     if getErrorStep(filename):
         stp_nb = getErrorStep(filename)['failed_stp']
         fields_dict['file_report'] = getErrorStep(filename)['filename'].rstrip()
-        fields_dict['test_name'] = filename.split('-')[1].split('.')[0].rstrip()
         openedFile = open(filename)
         for line in openedFile:
+            if 'ALIAS' in line:
+                fields_dict['test_name'] = line.split('=')[1].rstrip()
             if 'DL_ACTION_%s'%stp_nb in line:
                 fields_dict['scenario_failed'] = line.split('=')[1].rstrip()
             elif 'DL_ACTIONSTART_%s'%stp_nb in line:
