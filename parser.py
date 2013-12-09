@@ -64,11 +64,11 @@ def getFields(filename, pk):
     data = json.dumps(data)
     return str(data) 
 
-def serialize(wrs_dir):
+def serialize(daily_wrs_dir):
     lines = '' 
     pk = 0 
-    for filename in os.listdir(wrs_dir):
-        filename = os.path.join(wrs_dir,filename)
+    for filename in os.listdir(daily_wrs_dir):
+        filename = os.path.join(daily_wrs_dir,filename)
         if os.path.isfile(filename):
             pk += 1
             res = checkFile(filename)      
