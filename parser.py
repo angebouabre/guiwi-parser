@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+#-*-encoding:utf-8-*-
 """ """
 
 import os
@@ -68,26 +68,34 @@ def getFields(filename, pk):
 def serialize(daily_wrs_dir):
     lines = '' 
     pk = 0 
-    for filename in os.listdir(daily_wrs_dir):
-        filename = os.path.join(daily_wrs_dir,filename)
-        if os.path.isfile(filename):
-            pk += 1
-            res = checkFile(filename)      
-            line = getFields(filename, pk)
-            lines = line + ',' + lines
-    "Making a table with the json data like django fixture"
-    lines = '['+lines+']'
-    "SERIALIZING: Clean the the table in compliance with django fixture "
-    lines = lines.replace("},]","}]")
-    lines = lines.replace(",{}","")
-    lines = lines.replace("{},","")
-    
-    if not os.path.isdir(FIXTURE_DIR):
-        os.makedirs(FIXTURE_DIR)
-    fixture_file = os.path.join(FIXTURE_DIR,'fixture.json')
-    f = open(fixture_file,'w')
-    f.write(lines)
-    #write_logs(logs_file, "Fixture crée") 
-    f.close()
+    try:
+        for filename in os.listdir(daily_wrs_dir):
+            filename = os.path.join(daily_wrs_dir,filename)
+            if os.path.isfile(filename):
+                pk += 1
+                res = checkFile(filename)      
+                line = getFields(filename, pk)
+                lines = line + ',' + lines
+        "Making a table with the json data like django fixture"
+        lines = '['+lines+']'
+        "SERIALIZING: Clean the the table in compliance with django fixture "
+        lines = lines.replace("},]","}]")
+        lines = lines.replace(",{}","")
+        lines = lines.replace("{},","")
+        
+        if not os.path.isdir(FIXTURE_DIR):
+            os.makedirs(FIXTURE_DIR)
+        fixture_file = os.path.join(FIXTURE_DIR,'fixture.json')
+        f = open(fixture_file,'w')
+        f.write(lines)
+        f.close()
+        write_logs("%s\t\tFixture Done" %daily_wrs) 
+        return True
+    except IOError as e:
+        write_logs("%s\t\tFixture Failed\t%s, %s" %(daily_wrs, e.errno, strerror)) 
+        return False 
 
-serialize(RAW_RESULTS_DIR)
+
+all_wrs = get_daily_wrs_results(RAW_RESULTS_DIR)
+for daily_wrs in all_wrs: 
+    serialize(daily_wrs)
