@@ -2,11 +2,10 @@
 #-*-coding:utf-8-*-
 
 import os
-tmp_log = '/home/bouable/sfr-workspace/logs'
-wrs_folders=[]
 from datetime import datetime
 
 def write_logs(logs, msg):
+    """ Write msg in the logs file """
     logs = open(logs,'a')
     now = datetime.now()
     error_time = now.strftime('%b %d %Y %X')
@@ -16,6 +15,7 @@ def write_logs(logs, msg):
 
 def get_daily_wrs_results(raw_wrs):
     """ Recursive enter in version, then year, then month, then day. Using it in folder which contains the global version tests results"""
+    wrs_folders=[]
     for version_folder in os.listdir(raw_wrs):
         version_folder = os.path.join(raw_wrs,version_folder)
         for year_folder in os.listdir(version_folder):

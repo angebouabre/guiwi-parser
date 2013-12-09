@@ -4,6 +4,7 @@
 
 import os
 import json
+from utils import *
 from parsersettings import GLOBAL_RESULT, SUCCESS_CODE_1, SUCCESS_CODE_2, FIXTURE_DIR, RAW_RESULTS_DIR
 
 def checkFile(filename):
@@ -86,6 +87,7 @@ def serialize(daily_wrs_dir):
     fixture_file = os.path.join(FIXTURE_DIR,'fixture.json')
     f = open(fixture_file,'w')
     f.write(lines)
+    #write_logs(logs_file, "Fixture crée") 
     f.close()
 
 serialize(RAW_RESULTS_DIR)

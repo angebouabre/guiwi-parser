@@ -10,4 +10,7 @@ SUCCESS_CODE_2 = "=-201"
 RAW_RESULTS_DIR = "/home/bouable/sfr-workspace/raw-wrs/13.2.13/2013/12/9"
 
 #Full path to the folder where parser push the json format fixture
-FIXTURE_DIR = "/home/bouable/sfr-workspace/guiwi/witbe/stbattack/fixture" 
+FIXTURE_DIR = "/home/bouable/sfr-workspace/guiwi/witbe/stbattack/fixture"
+
+#Full path to the log folder
+LOG_DIR = '/home/bouable/sfr-workspace/guiwi-parser/logs' 
