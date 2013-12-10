@@ -10,7 +10,7 @@ SUCCESS_CODE_1 = "=0"
 SUCCESS_CODE_2 = "=-201"
 
 #Full path to the folder where parser get the wrs files, direct parent folder of version folder
-RAW_RESULTS_DIR = "/home/bouable/sfr-workspace/raw-ws"
+RAW_RESULTS_DIR = "/home/bouable/sfr-workspace/raw-wrs"
 
 #Full path to the folder where parser push the json format fixture. It will be generated.
 FIXTURE_DIR = "/home/bouable/sfr-workspace/guiwi/witbe/stbattack/fixture"

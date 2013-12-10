@@ -23,14 +23,15 @@ def get_daily_wrs_results(raw_wrs):
     try:
         for version_folder in os.listdir(raw_wrs):
             version_folder = os.path.join(raw_wrs,version_folder)
-            for year_folder in os.listdir(version_folder):
-                year_folder = os.path.join(raw_wrs,version_folder,year_folder)
-                for month_folder in os.listdir(year_folder):
-                    month_folder = os.path.join(raw_wrs,version_folder,year_folder,month_folder)
-                    for day_folder in os.listdir(month_folder):
-                        day_folder = os.path.join(raw_wrs,version_folder,year_folder,month_folder,day_folder)
-                        wrs_folders.append(day_folder)
-        return wrs_folders
-    except:
-        write_logs("Fixture Failed, Error in def get_daily_wrs_results. See RAW_RESULTS_DIR setting.") 
-        sys.exit() 
+    except OSError as e:
+        write_logs("Fixture Failed,\t%s:%s\tCheck RAW_RESULTS_DIR in setting." %(e.strerror, raw_wrs)) 
+        sys.exit()
+    else:
+        for year_folder in os.listdir(version_folder):
+            year_folder = os.path.join(raw_wrs,version_folder,year_folder)
+            for month_folder in os.listdir(year_folder):
+                month_folder = os.path.join(raw_wrs,version_folder,year_folder,month_folder)
+                for day_folder in os.listdir(month_folder):
+                    day_folder = os.path.join(raw_wrs,version_folder,year_folder,month_folder,day_folder)
+                    wrs_folders.append(day_folder)
+    return wrs_folders
