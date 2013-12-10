@@ -3,6 +3,7 @@
 """ """
 
 import os
+import shutil
 import json
 from utils import *
 from parsersettings import GLOBAL_RESULT, SUCCESS_CODE_1, SUCCESS_CODE_2, FIXTURE_DIR, RAW_RESULTS_DIR
@@ -51,15 +52,15 @@ def getFields(filename, pk):
                 fields_dict['test_name'] = line.split('=')[1].rstrip()
             if 'DL_ACTION_%s'%stp_nb in line:
                 fields_dict['scenario_failed'] = line.split('=')[1].rstrip()
-            elif 'DL_ACTIONSTART_%s'%stp_nb in line:
-                fields_dict['start_time'] = line.split('=')[1].rstrip()
-            elif 'DL_ACTIONEND_%s'%stp_nb in line:
-                fields_dict['end_time'] = line.split('=')[1].rstrip()
-            elif 'DL_ACTIONSTARTDATE_%s'%stp_nb in line:
-                fields_dict['start_date'] = line.split('=')[1].rstrip()
-            elif 'DL_RETURN%s'%stp_nb in line:
-                fields_dict['error_code'] = int(line.split('=')[1].rstrip())
-            elif 'capture=video' in line:
+            if 'DL_ACTIONSTART_%s'%stp_nb in line:
+              fields_dict['start_time'] = line.split('=')[1].rstrip()
+            if 'DL_ACTIONEND_%s'%stp_nb in line:
+              fields_dict['end_time'] = line.split('=')[1].rstrip()
+            if 'DL_ACTIONSTARTDATE_%s'%stp_nb in line:
+              fields_dict['start_date'] = line.split('=')[1].rstrip()
+            if 'DL_RETURN%s'%stp_nb in line:
+              fields_dict['error_code'] = int(line.split('=')[1].rstrip())
+            if 'capture=video' in line:
                 fields_dict['video_report'] = 'https:%s'%(line.split('=https:')[1].rstrip())
         data['fields']=fields_dict
     data = json.dumps(data)
@@ -72,9 +73,10 @@ def serialize(daily_wrs_dir):
         filename = os.path.join(daily_wrs_dir,filename)
         if os.path.isfile(filename):
             pk += 1
-            res = checkFile(filename)      
             line = getFields(filename, pk)
             lines = line + ',' + lines
+            os.remove(filename)
+            print "%s deleted."%filename
     "Making a table with the json data like django fixture"
     lines = '['+lines+']'
     "SERIALIZING: Clean the the table in compliance with django fixture "
@@ -88,10 +90,11 @@ def serialize(daily_wrs_dir):
     f = open(fixture_file,'w')
     f.write(lines)
     f.close()
-    write_logs("%s\t\tFixture Done" %daily_wrs) 
+    write_logs("Fixture Done\t\t%s" %daily_wrs) 
     return True
 
 
 all_wrs = get_daily_wrs_results(RAW_RESULTS_DIR)
 for daily_wrs in all_wrs: 
     serialize(daily_wrs)
+shutil.rmtree(RAW_RESULTS_DIR)
