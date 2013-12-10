@@ -93,8 +93,8 @@ def serialize(daily_wrs_dir):
     write_logs("Fixture Done\t\t%s" %daily_wrs) 
     return True
 
-
-all_wrs = get_daily_wrs_results(RAW_RESULTS_DIR)
-for daily_wrs in all_wrs: 
-    serialize(daily_wrs)
-shutil.rmtree(RAW_RESULTS_DIR)
+if __name__ == '__main__':
+    all_wrs = get_daily_wrs_results(RAW_RESULTS_DIR)
+    for daily_wrs in all_wrs: 
+        serialize(daily_wrs)
+    shutil.rmtree(RAW_RESULTS_DIR)
