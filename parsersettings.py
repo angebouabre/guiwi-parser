@@ -17,3 +17,5 @@ FIXTURE_DIR = "/home/bouable/sfr-workspace/guiwi/witbe/stbattack/fixture"
 
 #Full path to the log folder
 LOG_DIR = '/home/bouable/sfr-workspace/guiwi-parser/log' 
+
+DATABASE = '/home/bouable/sfr-workspace/guiwi/witbe/ti.db' 

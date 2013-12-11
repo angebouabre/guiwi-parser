@@ -2,6 +2,7 @@
 #-*-coding:utf-8-*-
 
 import os, sys
+import sqlite3
 from datetime import datetime
 from parsersettings import LOG_DIR
 
@@ -35,3 +36,11 @@ def get_daily_wrs_results(raw_wrs):
                     day_folder = os.path.join(raw_wrs,version_folder,year_folder,month_folder,day_folder)
                     wrs_folders.append(day_folder)
     return wrs_folders
+
+def get_last_pk(db):
+    conn = sqlite3.connect(db)
+    c = conn.cursor()
+    c.execute("select count () from stbattack_tasktest")
+    val = c.fetchone()
+    val = val[0]
+    return val

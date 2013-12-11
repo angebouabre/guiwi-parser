@@ -5,8 +5,9 @@
 import os
 import shutil
 import json
+import time
 from utils import *
-from parsersettings import GLOBAL_RESULT, SUCCESS_CODE_1, SUCCESS_CODE_2, FIXTURE_DIR, RAW_RESULTS_DIR
+from parsersettings import GLOBAL_RESULT, SUCCESS_CODE_1, SUCCESS_CODE_2, FIXTURE_DIR, RAW_RESULTS_DIR, DATABASE
 
 class WitbeLogFile(object):
 
@@ -87,7 +88,9 @@ class WitbeDailyFolder(object):
     
     def serialize(self):
         lines = '' 
-        pk = 0 
+        #time.sleep(10)
+        pk = get_last_pk(DATABASE) 
+        print pk
         for filename in os.listdir(self.dirname):
             filename = os.path.join(self.dirname, filename)
             if os.path.isfile(filename):
@@ -96,7 +99,7 @@ class WitbeDailyFolder(object):
                 line = filelog.getFields(pk)
                 lines = str(line) + ',' + lines
                 #os.remove(filename)
-                print "%s deleted."%self.dirname
+                #print "%s deleted."%self.dirname
         "Making a table with the json data like django fixture"
         lines = '['+lines+']'
         "SERIALIZING: Clean the the table in compliance with django fixture "
@@ -106,7 +109,8 @@ class WitbeDailyFolder(object):
         
         if not os.path.isdir(FIXTURE_DIR):
             os.makedirs(FIXTURE_DIR)
-        fixture_file = os.path.join(FIXTURE_DIR,'fixture.json')
+        nm = str(self.dirname.split('/')[5:]).replace("['","").replace("']","").replace("', '","-")
+        fixture_file = os.path.join(FIXTURE_DIR,'fixtures-%s.json' %nm)
         f = open(fixture_file,'w')
         f.write(lines)
         f.close()
