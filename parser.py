@@ -56,7 +56,7 @@ class WitbeLogFile(object):
         except NameError:
             data={"fields":{"scenario_failed":"","error_code":0,"start_date":start_date,"file_report":self.filename,"test_name":test_name},"model":"stbattack.tasktest"}
 
-        if self.getErrorStep():
+        if self.getErrorStep()['failed_stp']:
             stp_nb = self.getErrorStep()['failed_stp']
             fields_dict['file_report'] = self.filename.rstrip()
             openedFile = open(self.filename)
