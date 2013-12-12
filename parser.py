@@ -10,7 +10,7 @@ from utils import *
 from parsersettings import GLOBAL_RESULT, SUCCESS_CODE_1, SUCCESS_CODE_2, FIXTURE_DIR, RAW_RESULTS_DIR, DATABASE
 
 class WitbeLogFile(object):
-
+    """ Class of logsTM files """
     def __init__(self, filename):
         self.filename = filename
         
@@ -28,7 +28,7 @@ class WitbeLogFile(object):
 
     def getErrorStep(self):
         """ Return the scenario's step number of failed task """
-        res={}
+        res={'failed_stp':None}
         openedFile = open(self.filename)
         res = {'failed_stp':'', 'filename':self.filename}
         for line in openedFile:
@@ -82,7 +82,7 @@ class WitbeLogFile(object):
 
 
 class WitbeDailyFolder(object):
-    
+    """ Class of daily logs TM folder """
     def __init__(self, dirname):
         self.dirname = dirname
     
@@ -103,9 +103,7 @@ class WitbeDailyFolder(object):
         "Making a table with the json data like django fixture"
         lines = '['+lines+']'
         "SERIALIZING: Clean the the table in compliance with django fixture "
-        lines = lines.replace("},]","}]")
-        lines = lines.replace(",{}","")
-        lines = lines.replace("{},","")
+        lines = lines.replace("},]","}]").replace(",{}","").replace("{},","")
         
         if not os.path.isdir(FIXTURE_DIR):
             os.makedirs(FIXTURE_DIR)
