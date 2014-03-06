@@ -7,13 +7,17 @@ import shutil
 import json
 import time
 from utils import *
-from parsersettings import GLOBAL_RESULT, SUCCESS_CODE_1, SUCCESS_CODE_2, FIXTURE_DIR, RAW_RESULTS_DIR, DATABASE
+from parsersettings import *
 
 class WitbeLogFile(object):
     """ Class of logsTM files """
     def __init__(self, filename):
         self.filename = filename
-        
+        self.tag = filename.split('-')[-1].split('.')[0]
+        self.error_step = self.getErrorStep()
+        self.dependances = self.getDependances()
+        self.projet = self.getProjet()
+
     def checkFile(self):
         """ Check succes of task by global return in task report """
         res = {'result_test':"KO"}
@@ -42,6 +46,19 @@ class WitbeLogFile(object):
                     failed_step = line.split('=')[0].split("N")[1]
                     res = {'failed_stp':failed_step}
         return res               
+
+    def getDependances(self):
+        dep = []
+        for filename in os.listdir(os.path.dirname(self.filename)):
+            if self.tag in filename:
+                dep.append(filename)
+        return dep
+
+    def getProjet(self):
+        if os.path.isfile(self.filename):
+            #openedFile = open(self.filename)
+            self.projet = self.filename.split('/')[PROJET_INDEX] 
+        return self.projet             
 
     def getFields(self, pk):
         """ Get needed fields in task report """
@@ -79,7 +96,6 @@ class WitbeLogFile(object):
             data['fields']=fields_dict
         data = json.dumps(data)
         return data 
-
 
 class WitbeDailyFolder(object):
     """ Class of daily logs TM folder """
