@@ -10,6 +10,8 @@ import time
 from utils import *
 from parsersettings import *
 
+#TODO Use re to parse some expressions
+
 class WitbeLogFile(object):
     """ Class of logsTM files """
     def __init__(self, filename):
@@ -19,7 +21,8 @@ class WitbeLogFile(object):
         self.dependances = self.getDependances()
         self.projet = self.getProjet()
         self.projet_slug = self.projet
-        self.projet_fields = self.serialize_projet(1)
+        self.projet_fields = self.serialize_projet(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk from database
+        self.campagne_fields = self.serialize_campagne(1)
 
     def checkFile(self):
         """ Check succes of task by global return in task report """
@@ -64,7 +67,7 @@ class WitbeLogFile(object):
         return self.projet             
 
 
-    def serialize_projet(self, pk):
+    def serialize_projet(self, pk): 
         
         fields_dict={}
         openedFile = open(self.filename)
@@ -73,7 +76,7 @@ class WitbeLogFile(object):
                 date_debut_tests = line.split('=')[1].rstrip()
                 date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
                 date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-            if 'DATE' in line: #To rework because it  gets the last occurence 'DATE' in wrs file
+            if 'DATE' in line: #TODO rework because it  gets the last occurence 'DATE' in wrs file
                 date_debut = line.split('=')[1].rstrip()
 
         projet_fields = {"fields":{"nom":self.projet, "nbr_versions":None, "date_debut_tests":date_debut_tests, "slug": self.projet_slug, "nbr_mesures":None, "nbr_success_mesures":None,"nbr_failed_mesures":None,\
@@ -82,11 +85,16 @@ class WitbeLogFile(object):
         projet_fields = json.dumps(projet_fields)
         data = '['+ projet_fields +']'
         
-        f = open('test.json','w')
+        f = open('projet.json','w')
         f.write(data)
         f.close()
         
         return data 
+
+    def serialize_campagne(self, pk):
+
+
+
 
     def getFields(self, pk):
         """ Get needed fields in task report """
@@ -95,7 +103,7 @@ class WitbeLogFile(object):
         for line in openedFile:
             if 'ALIAS' in line:
                 test_name = line.split('=')[1].rstrip()
-            if 'DATE' in line: #To rework because it  gets the last occurence 'DATE' in wrs file
+            if 'DATE' in line: #TODO rework because it  gets the last occurence 'DATE' in wrs file
                 start_date = line.split('=')[1].rstrip()
         try:
             data={"fields":{"scenario_failed":"","error_code":0,"start_date":start_date,"file_report":self.filename,"test_name":test_name},"model":"stbattack.tasktest","pk":pk}
