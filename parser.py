@@ -3,6 +3,7 @@
 """ """
 
 import os
+import re 
 import shutil
 import json
 import time
@@ -70,6 +71,8 @@ class WitbeLogFile(object):
         for line in openedFile:
             if 'DATE=' in line:
                 date_debut_tests = line.split('=')[1].rstrip()
+                date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
+                date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
             if 'DATE' in line: #To rework because it  gets the last occurence 'DATE' in wrs file
                 date_debut = line.split('=')[1].rstrip()
 
