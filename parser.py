@@ -17,6 +17,8 @@ class WitbeLogFile(object):
         self.error_step = self.getErrorStep()
         self.dependances = self.getDependances()
         self.projet = self.getProjet()
+        self.projet_slug = self.projet
+        self.projet_fields = self.serialize_projet(1)
 
     def checkFile(self):
         """ Check succes of task by global return in task report """
@@ -59,6 +61,29 @@ class WitbeLogFile(object):
             #openedFile = open(self.filename)
             self.projet = self.filename.split('/')[PROJET_INDEX] 
         return self.projet             
+
+
+    def serialize_projet(self, pk):
+        
+        fields_dict={}
+        openedFile = open(self.filename)
+        for line in openedFile:
+            if 'DATE=' in line:
+                date_debut_tests = line.split('=')[1].rstrip()
+            if 'DATE' in line: #To rework because it  gets the last occurence 'DATE' in wrs file
+                date_debut = line.split('=')[1].rstrip()
+
+        projet_fields = {"fields":{"nom":self.projet, "nbr_versions":None, "date_debut_tests":date_debut_tests, "slug": self.projet_slug, "nbr_mesures":None, "nbr_success_mesures":None,"nbr_failed_mesures":None,\
+                         "date_debut":date_debut, "date_dernier_tests":None}, "model":"stbattack.projet", "pk":pk}
+
+        projet_fields = json.dumps(projet_fields)
+        data = '['+ projet_fields +']'
+        
+        f = open('test.json','w')
+        f.write(data)
+        f.close()
+        
+        return data 
 
     def getFields(self, pk):
         """ Get needed fields in task report """
