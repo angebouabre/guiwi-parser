@@ -22,3 +22,5 @@ DATABASE = '/home/bouable/workspace/project/sfr/neufbox-evol/integration/testi/g
 
 #Index position in the path
 PROJET_INDEX = 9
+VERSION_INDEX = 10
+SCENARIO_INDEX = 2 
