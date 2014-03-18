@@ -27,7 +27,15 @@ class WitbeLogFile(object):
         self.test = self.getTest()
         self.mesure = self.getMesure() 
         self.resultat = self.checkFile()
-        
+        ###########################################
+        self.test_name = ""
+        self.scenario_failed ="" 
+        self.start_time = None
+        self.end_time =  None
+        self.start_date = None
+        self.error_code = ""
+        self.video_report = ""
+
         #######  Get slug  ##############
         self.projet_slug = self.projet #TODO Write get*slug function for each propriete
         self.version_slug = self.version
@@ -76,28 +84,29 @@ class WitbeLogFile(object):
         return res               
 
     def getDependances(self):
-        
+        """ Get dependances and set principale""" 
         dep = []
         tab = []
         ranks = []
-        for filename in os.listdir(os.path.dirname(self.filename)):
+        self.principale = False
+        for filename in os.listdir(os.path.dirname(self.filename)): #< Construit un tableau de depandances en comparant les tags >
             if self.tag in filename:
                 dep.append(filename)
-        self.shortname = self.filename.split('/')[-1]
-        
-        for item in dep :
+        self.shortname = self.filename.split('/')[-1]                
+        for item in dep :                                           #< Contruit une table à 2 dimensions avec le numero d'ordre de la dependance et exclue le test courant >
             if item != self.shortname:
                 tab.append(item)
                 ranks.append([item.split('.')[1],item])
         dep = tab
         my_rank = self.shortname.split('.')[1]
-        principale = self.shortname
-        
-        for rank in ranks:
-            print rank[0], rank[1]
-            if rank[0] > my_rank:
+        principale = self.shortname                                 
+        for rank in ranks:                                         #< Compare les numeros d'ordre des tests et determine le test principal > 
+            if int(rank[0]) > int(my_rank):
                 principale = rank[1]
-        
+                my_rank = rank[0] 
+        self.test_principale = principale 
+        if self.test_principale == self.shortname:
+            self.principale = True
         return dep
 
 
@@ -363,8 +372,12 @@ class WitbeLogFile(object):
         f.close()
 
 if __name__ == '__main__':
-    all_wrs = get_daily_wrs_results(RAW_RESULTS_DIR)
-    for daily_wrs in all_wrs: 
-        daily_wrs = WitbeDailyFolder(daily_wrs)
-        daily_wrs.serialize()
-    shutil.rmtree(RAW_RESULTS_DIR)
+    dossier = '/home/bouable/workspace/project/sfr/neufbox-evol/integration/testi/fusion/13.2.20/2014/3/18/'
+    cnt = 0
+    for fic in os.listdir(dossier):
+        fic = os.path.join(dossier,fic)
+        f=WitbeLogFile(fic)
+        if f.principale == True:
+            print '{:<55}|{:<6}|{:<6}|{:<10}|{:<30}|{:<70}'.format(f.test_name,str(f.principale), str(f.resultat), f.error_code,f.scenario_failed, f.shortname)
+            cnt += 1
+    print cnt
