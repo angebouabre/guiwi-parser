@@ -15,7 +15,8 @@ from parsersettings import *
 class WitbeLogFile(object):
     """ Class of logsTM files """
     def __init__(self, filename):
-        self.filename = filename
+        
+        self.filename = filename #filename's Full path
         self.tag = filename.split('-')[-1].split('.')[0]
         self.error_step = self.getErrorStep()
         self.dependances = self.getDependances()
@@ -24,33 +25,41 @@ class WitbeLogFile(object):
         self.scenario = self.getScenario()
         self.theme = self.getTheme()
         self.test = self.getTest()
+        self.mesure = self.getMesure() 
+        self.resultat = self.checkFile()
+        
+        #######  Get slug  ##############
         self.projet_slug = self.projet #TODO Write get*slug function for each propriete
         self.version_slug = self.version
         self.campagne_slug = ""
         self.scenario_slug = ""
         self.theme_slug = self.getTheme()
         self.test_slug = self.getTest()
+        
+        ####### Get tables fields #######
         self.projet_fields = self.serialize_projet(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
         self.campagne_fields = self.serialize_campagne(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
         self.version_fields = self.serialize_version(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
         self.scenario_fields = self.serialize_scenario(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
         self.theme_fields = self.serialize_theme(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
         self.test_fields = self.serialize_test(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        self.mesure_fields = self.serialize_mesure(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+      
 
     def checkFile(self):
         """ Check succes of task by global return in task report """
-        res = {'result_test':"KO"}
+        res = False 
         if os.path.isfile(self.filename):
             openedFile = open(self.filename)
             for line in openedFile:
                 if GLOBAL_RESULT in line:
-                    res = "OK"
+                    res = True
                     break
         return res             
              
 
     def getErrorStep(self):
-        """ Return the scenario's step number of failed task """
+        """ Return the scenario's step number of failed task in dictionnary"""
         res={'failed_stp':None}
         openedFile = open(self.filename)
         res = {'failed_stp':'', 'filename':self.filename}
@@ -67,11 +76,30 @@ class WitbeLogFile(object):
         return res               
 
     def getDependances(self):
+        
         dep = []
+        tab = []
+        ranks = []
         for filename in os.listdir(os.path.dirname(self.filename)):
             if self.tag in filename:
                 dep.append(filename)
+        self.shortname = self.filename.split('/')[-1]
+        
+        for item in dep :
+            if item != self.shortname:
+                tab.append(item)
+                ranks.append([item.split('.')[1],item])
+        dep = tab
+        my_rank = self.shortname.split('.')[1]
+        principale = self.shortname
+        
+        for rank in ranks:
+            print rank[0], rank[1]
+            if rank[0] > my_rank:
+                principale = rank[1]
+        
         return dep
+
 
     def getProjet(self):
         if os.path.isfile(self.filename):
@@ -137,6 +165,11 @@ class WitbeLogFile(object):
                 if 'ALIAS' in line:
                     self.test = line.split('=')[1].rstrip()
         return self.test             
+
+    def getMesure(self):
+        if os.path.isfile(self.filename):
+            self.mesure = self.filename.split('/')[-1] 
+        return self.mesure             
 
 
     #TODO REWORK SERIALIZE METHODS TO FACTORISE CODE
@@ -286,76 +319,48 @@ class WitbeLogFile(object):
         
         return data 
 
-    def getFields(self, pk):
-        """ Get needed fields in task report """
-        fields_dict={}
+    
+    def serialize_mesure(self, pk):
+        
         openedFile = open(self.filename)
         for line in openedFile:
-            if 'ALIAS' in line:
-                test_name = line.split('=')[1].rstrip()
+            if 'DATE=' in line:
+                date_debut_mesures = line.split('=')[1].rstrip()
+                date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_mesures)
+                date_debut_mesures = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
             if 'DATE' in line: #TODO rework because it  gets the last occurence 'DATE' in wrs file
-                start_date = line.split('=')[1].rstrip()
-        try:
-            data={"fields":{"scenario_failed":"","error_code":0,"start_date":start_date,"file_report":self.filename,"test_name":test_name},"model":"stbattack.tasktest","pk":pk}
-        except NameError:
-            data={"fields":{"scenario_failed":"","error_code":0,"start_date":start_date,"file_report":self.filename,"test_name":test_name},"model":"stbattack.tasktest"}
+                date_debut = line.split('=')[1].rstrip()
 
-        if self.getErrorStep()['failed_stp']:
-            stp_nb = self.getErrorStep()['failed_stp']
-            fields_dict['file_report'] = self.filename.rstrip()
+            dico = self.getErrorStep()
+            stp_nb = dico['failed_stp']
+            self.file_report = self.filename.rstrip()
             openedFile = open(self.filename)
             for line in openedFile:
                 if 'ALIAS' in line:
-                    fields_dict['test_name'] = line.split('=')[1].rstrip()
+                    self.test_name = line.split('=')[1].rstrip()
                 if 'DL_ACTION_%s'%stp_nb in line:
-                    fields_dict['scenario_failed'] = line.split('=')[1].rstrip()
+                    self.scenario_failed = line.split('=')[1].rstrip()
                 if 'DL_ACTIONSTART_%s'%stp_nb in line:
-                  fields_dict['start_time'] = line.split('=')[1].rstrip()
+                    self.start_time = line.split('=')[1].rstrip() #Value Not used
                 if 'DL_ACTIONEND_%s'%stp_nb in line:
-                  fields_dict['end_time'] = line.split('=')[1].rstrip()
+                    self.end_time = line.split('=')[1].rstrip() #Value Not used
                 if 'DL_ACTIONSTARTDATE_%s'%stp_nb in line:
-                  fields_dict['start_date'] = line.split('=')[1].rstrip()
+                    self.start_date = line.split('=')[1].rstrip() #Value Not used
                 if 'DL_RETURN%s'%stp_nb in line:
-                  fields_dict['error_code'] = int(line.split('=')[1].rstrip())
+                    self.error_code = line.split('=')[1].rstrip()
                 if 'capture=video' in line:
-                    fields_dict['video_report'] = 'https:%s'%(line.split('=https:')[1].rstrip())
-            data['fields']=fields_dict
-        data = json.dumps(data)
-        return data 
-
-class WitbeDailyFolder(object):
-    """ Class of daily logs TM folder """
-    def __init__(self, dirname):
-        self.dirname = dirname
-    
-    def serialize(self):
-        lines = '' 
-        #time.sleep(10)
-        pk = get_last_pk(DATABASE) 
-        print pk
-        for filename in os.listdir(self.dirname):
-            filename = os.path.join(self.dirname, filename)
-            if os.path.isfile(filename):
-                pk += 1
-                filelog = WitbeLogFile(filename)
-                line = filelog.getFields(pk)
-                lines = str(line) + ',' + lines
-                #os.remove(filename)
-                #print "%s deleted."%self.dirname
-        "Making a table with the json data like django fixture"
-        lines = '['+lines+']'
-        "SERIALIZING: Clean the the table in compliance with django fixture "
-        lines = lines.replace("},]","}]").replace(",{}","").replace("{},","")
+                    self.video_report = 'https:%s'%(line.split('=https:')[1].rstrip())
         
-        if not os.path.isdir(FIXTURE_DIR):
-            os.makedirs(FIXTURE_DIR)
-        nm = str(self.dirname.split('/')[5:]).replace("['","").replace("']","").replace("', '","-")
-        fixture_file = os.path.join(FIXTURE_DIR,'fixtures-%s.json' %nm)
-        f = open(fixture_file,'w')
-        f.write(lines)
+        mesure_fields = {"fields":{"nom":self.mesure, "code_erreur":self.error_code,"scenario":[self.scenario],\
+                "test":[self.test],"principale":None,"resultat_test":self.resultat, "scenario_failed":self.scenario_failed,"date_fin":date_debut,"version":[self.version, date_debut_mesures],\
+                "video_report":self.video_report, "campagne":[date_debut_mesures], "file_report":self.filename, "date_debut":date_debut}, "model":"stbattack.mesure", "pk":pk}
+
+        mesure_fields = json.dumps(mesure_fields)
+        data = '['+ mesure_fields +']'
+        
+        f = open('fixture/mesure.json','w')
+        f.write(data)
         f.close()
-        write_logs("Fixture Done\t\t%s" %self.dirname) 
-        return True
 
 if __name__ == '__main__':
     all_wrs = get_daily_wrs_results(RAW_RESULTS_DIR)
