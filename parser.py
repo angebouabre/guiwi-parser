@@ -14,7 +14,7 @@ from parsersettings import *
 
 class WitbeLogFile(object):
     """ Class of logsTM files """
-    def __init__(self, filename):
+    def __init__(self, filename, pk_mesure, pk_scenario, pk_test, pk_theme):
         
         self.filename = filename #filename's Full path
         self.tag = filename.split('-')[-1].split('.')[0]
@@ -22,6 +22,7 @@ class WitbeLogFile(object):
         self.dependances = self.getDependances()
         self.projet = self.getProjet()
         self.version = self.getVersion()
+        self.campagne = self.getCampagne()
         self.scenario = self.getScenario()
         self.theme = self.getTheme()
         self.test = self.getTest()
@@ -33,9 +34,10 @@ class WitbeLogFile(object):
         self.start_time = None
         self.end_time =  None
         self.start_date = None
-        self.error_code = ""
+        self.error_code = self.getErrorCode() 
+        self.error_code_scenario = None 
         self.video_report = ""
-
+        self.date_debut = self.getCampagne()
         #######  Get slug  ##############
         self.projet_slug = self.projet #TODO Write get*slug function for each propriete
         self.version_slug = self.version
@@ -43,19 +45,19 @@ class WitbeLogFile(object):
         self.scenario_slug = ""
         self.theme_slug = self.getTheme()
         self.test_slug = self.getTest()
-        
+         
         ####### Get tables fields #######
         self.projet_fields = self.serialize_projet(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
         self.campagne_fields = self.serialize_campagne(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
         self.version_fields = self.serialize_version(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.scenario_fields = self.serialize_scenario(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.theme_fields = self.serialize_theme(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.test_fields = self.serialize_test(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.mesure_fields = self.serialize_mesure(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        self.scenario_fields = self.serialize_scenario(pk_scenario) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        self.theme_fields = self.serialize_theme(pk_theme) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        self.test_fields = self.serialize_test(pk_test) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        self.mesure_fields = self.serialize_mesure(pk_mesure) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
       
 
     def checkFile(self):
-        """ Check succes of task by global return in task report """
+        """ Check succes of task by global return in task report Success = True, Failed = False"""
         res = False 
         if os.path.isfile(self.filename):
             openedFile = open(self.filename)
@@ -64,7 +66,15 @@ class WitbeLogFile(object):
                     res = True
                     break
         return res             
-             
+    
+    def getErrorCode(self):
+        if os.path.isfile(self.filename):
+            openedFile = open(self.filename)
+            for line in openedFile:
+                if "RETURN=" in line:
+                    self.error_code = line.split('=')[1].rstrip()
+        return self.error_code            
+
 
     def getErrorStep(self):
         """ Return the scenario's step number of failed task in dictionnary"""
@@ -111,22 +121,33 @@ class WitbeLogFile(object):
 
 
     def getProjet(self):
+        """ Parse file's full path and get the project name """
         if os.path.isfile(self.filename):
             #openedFile = open(self.filename)
             self.projet = self.filename.split('/')[PROJET_INDEX] 
         return self.projet             
 
     def getVersion(self):
+        """ Parse file's full path and get the version number """
         if os.path.isfile(self.filename):
             #openedFile = open(self.filename)
             self.version = self.filename.split('/')[VERSION_INDEX] 
         return self.version             
 
-    def getScenario(self):
+    def getCampagne(self):
         if os.path.isfile(self.filename):
             #openedFile = open(self.filename)
-            self.scenario = self.filename.split('_')[SCENARIO_INDEX] 
-        return "scenario" + self.scenario + ".txt"             
+            self.campagne = self.filename.split('/')[VERSION_INDEX+1:VERSION_INDEX+4]
+            self.campagne = self.campagne[-3]+'-'+'0'+self.campagne[-2]+'-'+self.campagne[-1]
+        return self.campagne             
+
+    
+    def getScenario(self):
+        """ Parse file's full path and split to build scneario name"""
+        if os.path.isfile(self.filename):
+            #openedFile = open(self.filename)
+            self.scenario = self.filename.split('_')[SCENARIO_INDEX].lower() 
+        return self.scenario + ".txt"             
 
     def getTheme(self):
         if os.path.isfile(self.filename):
@@ -134,28 +155,32 @@ class WitbeLogFile(object):
             self.theme = self.filename.split('-')[2]
             if 'TI_Sys' in self.theme:
                 self.theme = "Systeme"
+            elif 'TI_User_ACCUEIL' in self.theme:
+                self.theme = "accueil"
+            elif 'TI_User_SETTINGS' in self.theme:
+                self.theme = "reglages"
             elif 'TI_User_APPLI' in self.theme:
-                self.theme = "Applications"
+                self.theme = "applications"
             elif 'TI_User_CPCS' in self.theme:
-                self.theme = "Canal Plus - Canal Sat" 
+                self.theme = "canal" 
             elif 'TI_User_DIAG' in self.theme:
-                self.theme = "DIAG"
+                self.theme = "diagnostic"
             elif 'TI_User_EPG' in self.theme:
-                self.theme = "EPG"
+                self.theme = "epg"
             elif 'TI_User_GOD' in self.theme:
-                self.theme = "GOD"
+                self.theme = "god"
             elif 'TI_User_MOSAIC' in self.theme:
-                self.theme = "MODAIC"
+                self.theme = "mosaic"
             elif 'TI_User_MC' in self.theme:
-                self.theme = "MEDIA CENTER"
+                self.theme = "media center"
             elif 'TI_User_OPTIONSTV' in self.theme:
-                self.theme = "OPTIONS TV"
+                self.theme = "options tv"
             elif 'TI_User_RADIOS' in self.theme:
-                self.theme = "RADIOS"
+                self.theme = "radios"
             elif 'TI_User_SEARCH' in self.theme:
-                self.theme = "RECHERCHE"
+                self.theme = "recherche"
             elif 'TI_User_HELP' in self.theme:
-                self.theme = "AIDE"
+                self.theme = "aide"
             elif 'TI_User_PVR' in self.theme:
                 self.theme = "PVR"
             elif 'TI_User_TNT' in self.theme:
@@ -192,18 +217,20 @@ class WitbeLogFile(object):
                 date_debut_tests = line.split('=')[1].rstrip()
                 date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
                 date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-            if 'DATE' in line: #TODO rework because it  gets the last occurence 'DATE' in wrs file
-                date_debut = line.split('=')[1].rstrip()
 
         projet_fields = {"fields":{"nom":self.projet, "nbr_versions":None, "date_debut_tests":date_debut_tests, "slug": self.projet_slug, "nbr_mesures":None, "nbr_success_mesures":None,"nbr_failed_mesures":None,\
-                         "date_debut":date_debut, "date_dernier_tests":None}, "model":"stbattack.projet", "pk":pk}
+                         "date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.projet", "pk":pk}
 
         projet_fields = json.dumps(projet_fields)
         data = '['+ projet_fields +']'
         
-        f = open('fixture/projet.json','w')
-        f.write(data)
-        f.close()
+        output_file = "fixture/projet_%s.json" %self.projet
+        
+        if not os.path.isfile(output_file):  
+            print output_file
+            f = open(output_file,'w')
+            f.write(data)
+            f.close()
         
         return data 
 
@@ -216,19 +243,20 @@ class WitbeLogFile(object):
                 date_debut_tests = line.split('=')[1].rstrip()
                 date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
                 date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-            if 'DATE' in line: #TODO rework because it  gets the last occurence 'DATE' in wrs file
-                date_debut = line.split('=')[1].rstrip()
 
-        campagne_fields = {"fields":{"date_debut_tests":date_debut_tests, "slug": self.campagne_slug, "nbr_mesures":None, "nbr_success_mesures":None,"nbr_failed_mesures":None,\
-                "date_debut":date_debut, "date_fin":date_debut , "date_dernier_tests":None}, "model":"stbattack.campagne", "pk":pk}
+        campagne_fields = {"fields":{"date_debut_tests":None, "slug": self.campagne_slug, "nbr_mesures":None, "nbr_success_mesures":None,"nbr_failed_mesures":None,\
+                "date_debut":self.date_debut, "date_fin":self.date_debut , "date_dernier_tests":None}, "model":"stbattack.campagne", "pk":pk}
 
         campagne_fields = json.dumps(campagne_fields)
         data = '['+ campagne_fields +']'
         
-        f = open('fixture/campagne.json','w')
-        f.write(data)
-        f.close()
+        output_file = "fixture/campagne_du_%s.json" %self.campagne
         
+        if not os.path.isfile(output_file):  
+            print output_file
+            f = open(output_file,'w')
+            f.write(data)
+            f.close()
         return data 
 
     def serialize_version(self, pk):
@@ -240,20 +268,20 @@ class WitbeLogFile(object):
                 date_debut_tests = line.split('=')[1].rstrip()
                 date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
                 date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-            if 'DATE' in line: #TODO rework because it  gets the last occurence 'DATE' in wrs file
-                date_debut = line.split('=')[1].rstrip()
 
         version_fields = {"fields":{"date_debut_tests":date_debut_tests, "projet":[self.projet,date_debut_tests],"numero":self.version,"slug": self.version_slug, "nbr_mesures":None,\
-                "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":date_debut, "date_dernier_tests":None}, "model":"stbattack.version", "pk":pk}
+                "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.version", "pk":pk}
 
         version_fields = json.dumps(version_fields)
         data = '['+ version_fields +']'
         
-        f = open('fixture/version.json','w')
-        f.write(data)
-        f.close()
+        output_file = "fixture/version_%s.json" %self.version
         
-        return data 
+        if not os.path.isfile(output_file):  
+            print output_file
+            f = open(output_file,'w')
+            f.write(data)
+            f.close()
     
     def serialize_scenario(self, pk):
 
@@ -264,19 +292,20 @@ class WitbeLogFile(object):
                 date_debut_tests = line.split('=')[1].rstrip()
                 date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
                 date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-            if 'DATE' in line: #TODO rework because it  gets the last occurence 'DATE' in wrs file
-                date_debut = line.split('=')[1].rstrip()
 
         scenario_fields = {"fields":{"date_debut_tests":date_debut_tests, "nom":self.scenario,"slug": self.scenario_slug, "nbr_mesures":None,\
-                "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":date_debut, "date_dernier_tests":None}, "model":"stbattack.scenario", "pk":pk}
+                "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.scenario", "pk":pk}
 
         scenario_fields = json.dumps(scenario_fields)
         data = '['+ scenario_fields +']'
         
-        f = open('fixture/scenario.json','w')
-        f.write(data)
-        f.close()
+        output_file = "fixture/scenario_%s.json" %self.scenario
         
+        if not os.path.isfile(output_file):  
+            print output_file
+            f = open(output_file,'w')
+            f.write(data)
+            f.close()
         return data 
     
    
@@ -289,18 +318,20 @@ class WitbeLogFile(object):
                 date_debut_tests = line.split('=')[1].rstrip()
                 date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
                 date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-            if 'DATE' in line: #TODO rework because it  gets the last occurence 'DATE' in wrs file
-                date_debut = line.split('=')[1].rstrip()
 
         theme_fields = {"fields":{"date_debut_tests":date_debut_tests, "nom":self.theme,"slug": self.theme_slug, "nbr_mesures":None,\
-                "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":date_debut, "date_dernier_tests":None}, "model":"stbattack.theme", "pk":pk}
+                "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.theme", "pk":pk}
 
         theme_fields = json.dumps(theme_fields)
         data = '['+ theme_fields +']'
         
-        f = open('fixture/theme.json','w')
-        f.write(data)
-        f.close()
+        output_file = "fixture/theme_%s.json" %self.theme
+        
+        if not os.path.isfile(output_file):  
+            print output_file
+            f = open(output_file,'w')
+            f.write(data)
+            f.close()
         
         return data 
 
@@ -313,18 +344,20 @@ class WitbeLogFile(object):
                 date_debut_tests = line.split('=')[1].rstrip()
                 date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
                 date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-            if 'DATE' in line: #TODO rework because it  gets the last occurence 'DATE' in wrs file
-                date_debut = line.split('=')[1].rstrip()
 
         test_fields = {"fields":{"date_debut_tests":date_debut_tests, "nom":self.test,"slug": self.test_slug, "nbr_mesures":None,"theme":[self.theme],\
-                "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":date_debut, "date_dernier_tests":None}, "model":"stbattack.test", "pk":pk}
+                "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.test", "pk":pk}
 
         test_fields = json.dumps(test_fields)
         data = '['+ test_fields +']'
         
-        f = open('fixture/test.json','w')
-        f.write(data)
-        f.close()
+        output_file = "fixture/test_%s.json" %self.test
+        
+        if not os.path.isfile(output_file):  
+            print output_file
+            f = open(output_file,'w')
+            f.write(data)
+            f.close()
         
         return data 
 
@@ -337,47 +370,61 @@ class WitbeLogFile(object):
                 date_debut_mesures = line.split('=')[1].rstrip()
                 date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_mesures)
                 date_debut_mesures = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-            if 'DATE' in line: #TODO rework because it  gets the last occurence 'DATE' in wrs file
-                date_debut = line.split('=')[1].rstrip()
 
             dico = self.getErrorStep()
             stp_nb = dico['failed_stp']
             self.file_report = self.filename.rstrip()
-            openedFile = open(self.filename)
-            for line in openedFile:
-                if 'ALIAS' in line:
-                    self.test_name = line.split('=')[1].rstrip()
-                if 'DL_ACTION_%s'%stp_nb in line:
-                    self.scenario_failed = line.split('=')[1].rstrip()
-                if 'DL_ACTIONSTART_%s'%stp_nb in line:
-                    self.start_time = line.split('=')[1].rstrip() #Value Not used
-                if 'DL_ACTIONEND_%s'%stp_nb in line:
-                    self.end_time = line.split('=')[1].rstrip() #Value Not used
-                if 'DL_ACTIONSTARTDATE_%s'%stp_nb in line:
-                    self.start_date = line.split('=')[1].rstrip() #Value Not used
-                if 'DL_RETURN%s'%stp_nb in line:
-                    self.error_code = line.split('=')[1].rstrip()
-                if 'capture=video' in line:
-                    self.video_report = 'https:%s'%(line.split('=https:')[1].rstrip())
+            
+            if 'ALIAS' in line:
+                self.test_name = line.split('=')[1].rstrip()
+            if 'DL_ACTION_%s'%stp_nb in line:
+                self.scenario_failed = line.split('=')[1].rstrip()
+            if 'DL_ACTIONSTART_%s'%stp_nb in line:
+                self.start_time = line.split('=')[1].rstrip() #Value Not used
+            if 'DL_ACTIONEND_%s'%stp_nb in line:
+                self.end_time = line.split('=')[1].rstrip() #Value Not used
+            if 'DL_ACTIONSTARTDATE_%s'%stp_nb in line:
+                self.start_date = line.split('=')[1].rstrip() #Value Not used
+            if 'DL_RETURN%s'%stp_nb in line:
+                self.error_code_scenario = line.split('=')[1].rstrip()
+            if 'capture=video' in line:
+                self.video_report = 'https:%s'%(line.split('=https:')[1].rstrip())
         
+        if self.resultat == True:
+            self.scenario_failed = ""  
+
         mesure_fields = {"fields":{"nom":self.mesure, "code_erreur":self.error_code,"scenario":[self.scenario],\
-                "test":[self.test],"principale":None,"resultat_test":self.resultat, "scenario_failed":self.scenario_failed,"date_fin":date_debut,"version":[self.version, date_debut_mesures],\
-                "video_report":self.video_report, "campagne":[date_debut_mesures], "file_report":self.filename, "date_debut":date_debut}, "model":"stbattack.mesure", "pk":pk}
+                "test":[self.test],"principale":None,"resultat_test":self.resultat, "scenario_failed":self.scenario_failed,"date_fin":self.date_debut,"version":[self.version],\
+                "video_report":self.video_report, "campagne":[self.date_debut], "file_report":self.filename, "date_debut":self.date_debut}, "model":"stbattack.mesure", "pk":pk}
 
         mesure_fields = json.dumps(mesure_fields)
         data = '['+ mesure_fields +']'
         
-        f = open('fixture/mesure.json','w')
-        f.write(data)
-        f.close()
+        output_file = "fixture/mesure_%s.json" %self.mesure
+        
+        if not os.path.isfile(output_file):  
+            print output_file
+            f = open(output_file,'w')
+            f.write(data)
+            f.close()
+        return data
 
 if __name__ == '__main__':
     dossier = '/home/bouable/workspace/project/sfr/neufbox-evol/integration/testi/fusion/13.2.20/2014/3/18/'
     cnt = 0
+    print '{:<55}|{:<6}|{:<6}|{:<10}|{:<30}|{:<70}'.format("Nom du test","parent", "Result", " EC ","Scenario echoue", "Filename")
     for fic in os.listdir(dossier):
         fic = os.path.join(dossier,fic)
         f=WitbeLogFile(fic)
         if f.principale == True:
+            print '{:<55}|{:<6}|{:<6}|{:<10}|{:<30}|{:<70}'.format(f.test_name,str(f.principale), str(f.resultat), f.error_code,f.scenario_failed, f.shortname)
+            cnt += 1
+    print cnt
+    cnt = 0
+    for fic in os.listdir(dossier):
+        fic = os.path.join(dossier,fic)
+        f=WitbeLogFile(fic)
+        if f.principale == False:
             print '{:<55}|{:<6}|{:<6}|{:<10}|{:<30}|{:<70}'.format(f.test_name,str(f.principale), str(f.resultat), f.error_code,f.scenario_failed, f.shortname)
             cnt += 1
     print cnt
