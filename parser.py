@@ -14,7 +14,7 @@ from parsersettings import *
 
 class WitbeLogFile(object):
     """ Class of logsTM files """
-    def __init__(self, filename, pk_mesure, pk_scenario, pk_test, pk_theme):
+    def __init__(self, filename, pk_campagne, pk_mesure, pk_scenario, pk_test, pk_theme):
         
         self.filename = filename #filename's Full path
         self.tag = filename.split('-')[-1].split('.')[0]
@@ -45,10 +45,11 @@ class WitbeLogFile(object):
         self.scenario_slug = ""
         self.theme_slug = self.getTheme()
         self.test_slug = self.getTest()
-         
+        
+        self.date_debut_tests = self.getDateDebutTests()
         ####### Get tables fields #######
         self.projet_fields = self.serialize_projet(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.campagne_fields = self.serialize_campagne(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        self.campagne_fields = self.serialize_campagne(pk_campagne) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
         self.version_fields = self.serialize_version(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
         self.scenario_fields = self.serialize_scenario(pk_scenario) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
         self.theme_fields = self.serialize_theme(pk_theme) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
@@ -149,6 +150,18 @@ class WitbeLogFile(object):
             self.scenario = self.filename.split('_')[SCENARIO_INDEX].lower() 
         return self.scenario + ".txt"             
 
+    
+    def getDateDebutTests(self):
+        
+        openedFile = open(self.filename)
+        for line in openedFile:
+            if 'DATE=' in line:
+                date_debut_tests = line.split('=')[1].rstrip()
+                date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
+                date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
+        return date_debut_tests  
+    
+    
     def getTheme(self):
         if os.path.isfile(self.filename):
             #openedFile = open(self.filename)
@@ -210,15 +223,7 @@ class WitbeLogFile(object):
 
     def serialize_projet(self, pk): 
         
-        fields_dict={}
-        openedFile = open(self.filename)
-        for line in openedFile:
-            if 'DATE=' in line:
-                date_debut_tests = line.split('=')[1].rstrip()
-                date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
-                date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-
-        projet_fields = {"fields":{"nom":self.projet, "nbr_versions":None, "date_debut_tests":date_debut_tests, "slug": self.projet_slug, "nbr_mesures":None, "nbr_success_mesures":None,"nbr_failed_mesures":None,\
+        projet_fields = {"fields":{"nom":self.projet, "nbr_versions":None, "date_debut_tests":self.date_debut_tests, "slug": self.projet_slug, "nbr_mesures":None, "nbr_success_mesures":None,"nbr_failed_mesures":None,\
                          "date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.projet", "pk":pk}
 
         projet_fields = json.dumps(projet_fields)
@@ -235,14 +240,6 @@ class WitbeLogFile(object):
         return data 
 
     def serialize_campagne(self, pk):
-
-        fields_dict={}
-        openedFile = open(self.filename)
-        for line in openedFile:
-            if 'DATE=' in line:
-                date_debut_tests = line.split('=')[1].rstrip()
-                date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
-                date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
 
         campagne_fields = {"fields":{"date_debut_tests":None, "slug": self.campagne_slug, "nbr_mesures":None, "nbr_success_mesures":None,"nbr_failed_mesures":None,\
                 "date_debut":self.date_debut, "date_fin":self.date_debut , "date_dernier_tests":None}, "model":"stbattack.campagne", "pk":pk}
@@ -261,15 +258,7 @@ class WitbeLogFile(object):
 
     def serialize_version(self, pk):
 
-        fields_dict={}
-        openedFile = open(self.filename)
-        for line in openedFile:
-            if 'DATE=' in line:
-                date_debut_tests = line.split('=')[1].rstrip()
-                date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
-                date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-
-        version_fields = {"fields":{"date_debut_tests":date_debut_tests, "projet":[self.projet,date_debut_tests],"numero":self.version,"slug": self.version_slug, "nbr_mesures":None,\
+        version_fields = {"fields":{"date_debut_tests":self.date_debut_tests, "projet":[self.projet,self.date_debut_tests],"numero":self.version,"slug": self.version_slug, "nbr_mesures":None,\
                 "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.version", "pk":pk}
 
         version_fields = json.dumps(version_fields)
@@ -285,15 +274,7 @@ class WitbeLogFile(object):
     
     def serialize_scenario(self, pk):
 
-        fields_dict={}
-        openedFile = open(self.filename)
-        for line in openedFile:
-            if 'DATE=' in line:
-                date_debut_tests = line.split('=')[1].rstrip()
-                date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
-                date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-
-        scenario_fields = {"fields":{"date_debut_tests":date_debut_tests, "nom":self.scenario,"slug": self.scenario_slug, "nbr_mesures":None,\
+        scenario_fields = {"fields":{"date_debut_tests":self.date_debut_tests, "nom":self.scenario,"slug": self.scenario_slug, "nbr_mesures":None,\
                 "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.scenario", "pk":pk}
 
         scenario_fields = json.dumps(scenario_fields)
@@ -311,15 +292,7 @@ class WitbeLogFile(object):
    
     def serialize_theme(self, pk):
 
-        fields_dict={}
-        openedFile = open(self.filename)
-        for line in openedFile:
-            if 'DATE=' in line:
-                date_debut_tests = line.split('=')[1].rstrip()
-                date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
-                date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-
-        theme_fields = {"fields":{"date_debut_tests":date_debut_tests, "nom":self.theme,"slug": self.theme_slug, "nbr_mesures":None,\
+        theme_fields = {"fields":{"date_debut_tests":self.date_debut_tests, "nom":self.theme,"slug": self.theme_slug, "nbr_mesures":None,\
                 "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.theme", "pk":pk}
 
         theme_fields = json.dumps(theme_fields)
@@ -337,15 +310,7 @@ class WitbeLogFile(object):
 
     def serialize_test(self, pk):
 
-        fields_dict={}
-        openedFile = open(self.filename)
-        for line in openedFile:
-            if 'DATE=' in line:
-                date_debut_tests = line.split('=')[1].rstrip()
-                date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_tests)
-                date_debut_tests = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-
-        test_fields = {"fields":{"date_debut_tests":date_debut_tests, "nom":self.test,"slug": self.test_slug, "nbr_mesures":None,"theme":[self.theme],\
+        test_fields = {"fields":{"date_debut_tests":self.date_debut_tests, "nom":self.test,"slug": self.test_slug, "nbr_mesures":None,"theme":[self.theme],\
                 "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.test", "pk":pk}
 
         test_fields = json.dumps(test_fields)
@@ -366,11 +331,7 @@ class WitbeLogFile(object):
         
         openedFile = open(self.filename)
         for line in openedFile:
-            if 'DATE=' in line:
-                date_debut_mesures = line.split('=')[1].rstrip()
-                date = re.match(r"(....)(..)(..)(..)(..)(..)", date_debut_mesures)
-                date_debut_mesures = date.groups(0)[0] +'-'+ date.groups(0)[1] +'-'+ date.groups(0)[2] +' '+ date.groups(0)[3] +':'+ date.groups(0)[4] +':'+ date.groups(0)[5]
-
+            
             dico = self.getErrorStep()
             stp_nb = dico['failed_stp']
             self.file_report = self.filename.rstrip()
