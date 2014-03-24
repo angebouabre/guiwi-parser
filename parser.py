@@ -222,6 +222,8 @@ class WitbeLogFile(object):
     #TODO REWORK SERIALIZE METHODS TO FACTORISE CODE
 
     def serialize_projet(self, pk): 
+        """ This method generate the projet's fixture file"""
+        #I will return True and use this function in the main program
         
         projet_fields = {"fields":{"nom":self.projet, "nbr_versions":None, "date_debut_tests":self.date_debut_tests, "slug": self.projet_slug, "nbr_mesures":None, "nbr_success_mesures":None,"nbr_failed_mesures":None,\
                          "date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.projet", "pk":pk}
@@ -236,10 +238,11 @@ class WitbeLogFile(object):
             f = open(output_file,'w')
             f.write(data)
             f.close()
-        
         return data 
 
     def serialize_campagne(self, pk):
+        """ This method generate the campagne's fixture file"""
+        #I will return True and use this function in the main program
 
         campagne_fields = {"fields":{"date_debut_tests":None, "slug": self.campagne_slug, "nbr_mesures":None, "nbr_success_mesures":None,"nbr_failed_mesures":None,\
                 "date_debut":self.date_debut, "date_fin":self.date_debut , "date_dernier_tests":None}, "model":"stbattack.campagne", "pk":pk}
@@ -257,6 +260,8 @@ class WitbeLogFile(object):
         return data 
 
     def serialize_version(self, pk):
+        """ This method generate the version's fixture file"""
+        #I will return True and use this function in the main program
 
         version_fields = {"fields":{"date_debut_tests":self.date_debut_tests, "projet":[self.projet,self.date_debut_tests],"numero":self.version,"slug": self.version_slug, "nbr_mesures":None,\
                 "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.version", "pk":pk}
@@ -273,6 +278,8 @@ class WitbeLogFile(object):
             f.close()
     
     def serialize_scenario(self, pk):
+        """ This method generate the scenario's fixture file"""
+        #I will return True and use this function in the main program
 
         scenario_fields = {"fields":{"date_debut_tests":self.date_debut_tests, "nom":self.scenario,"slug": self.scenario_slug, "nbr_mesures":None,\
                 "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.scenario", "pk":pk}
@@ -291,6 +298,8 @@ class WitbeLogFile(object):
     
    
     def serialize_theme(self, pk):
+        """ This method generate the theme's fixture file"""
+        #I will return True and use this function in the main program
 
         theme_fields = {"fields":{"date_debut_tests":self.date_debut_tests, "nom":self.theme,"slug": self.theme_slug, "nbr_mesures":None,\
                 "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.theme", "pk":pk}
@@ -309,6 +318,8 @@ class WitbeLogFile(object):
         return data 
 
     def serialize_test(self, pk):
+        """ This method generate the test's fixture file"""
+        #I will return True and use this function in the main program
 
         test_fields = {"fields":{"date_debut_tests":self.date_debut_tests, "nom":self.test,"slug": self.test_slug, "nbr_mesures":None,"theme":[self.theme],\
                 "nbr_success_mesures":None,"nbr_failed_mesures":None,"date_debut":self.date_debut, "date_dernier_tests":None}, "model":"stbattack.test", "pk":pk}
@@ -328,6 +339,8 @@ class WitbeLogFile(object):
 
     
     def serialize_mesure(self, pk):
+        """ This method generate the mesure's fixture file"""
+        #I will return True and use this function in the main program
         
         openedFile = open(self.filename)
         for line in openedFile:

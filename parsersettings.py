@@ -21,6 +21,10 @@ LOG_DIR = '/home/bouable/workspace/project/sfr/neufbox-evol/integration/testi/gu
 DATABASE = '/home/bouable/workspace/project/sfr/neufbox-evol/integration/testi/guiwi/witbe/ti.db'
 
 #Index position in the path
-PROJET_INDEX = 9
+PROJET_INDEX = 9 
 VERSION_INDEX = 10
 SCENARIO_INDEX = 2 
+
+#For my Personnal PC
+#PROJET_INDEX = 4 
+#VERSION_INDEX = 5 
