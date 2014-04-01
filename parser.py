@@ -19,6 +19,8 @@ class WitbeLogFile(object):
         self.filename = filename #filename's Full path
         self.tag = filename.split('-')[-1].split('.')[0]
         self.error_step = self.getErrorStep()
+        self.test_principal = None      #Doit être déclaré avant l'appel de getDependances()
+        self.test_is_principal = False  #Doit être déclaré avant l'appel de getDependances()
         self.dependances = self.getDependances()
         self.projet = self.getProjet()
         self.version = self.getVersion()
@@ -95,12 +97,11 @@ class WitbeLogFile(object):
         return res               
 
     def getDependances(self):
-        """ Get dependances and set principale""" 
+        """ Get dependances and set principal""" 
         dep = []
         tab = []
         ranks = []
-        self.principale = False
-        for filename in os.listdir(os.path.dirname(self.filename)): #< Construit un tableau de depandances en comparant les tags >
+        for filename in os.listdir(os.path.dirname(self.filename)): #< Construit un tableau de dependances en comparant les tags >
             if self.tag in filename:
                 dep.append(filename)
         self.shortname = self.filename.split('/')[-1]                
@@ -115,9 +116,10 @@ class WitbeLogFile(object):
             if int(rank[0]) > int(my_rank):
                 principale = rank[1]
                 my_rank = rank[0] 
-        self.test_principale = principale 
-        if self.test_principale == self.shortname:
-            self.principale = True
+        self.test_principal = [principale] 
+        if self.test_principal[0] == self.shortname:
+            self.test_is_principal = True
+            self.test_principal = None 
         return dep
 
 
@@ -139,7 +141,11 @@ class WitbeLogFile(object):
         if os.path.isfile(self.filename):
             #openedFile = open(self.filename)
             self.campagne = self.filename.split('/')[VERSION_INDEX+1:VERSION_INDEX+4]
-            self.campagne = self.campagne[-3]+'-'+'0'+self.campagne[-2]+'-'+self.campagne[-1]
+            if len(self.campagne[-2]) != 2:
+                self.campagne[-2] = '0'+ self.campagne[-2]
+            if len(self.campagne[-1]) != 2:
+                self.campagne[-1] = '0'+ self.campagne[-1]
+            self.campagne = self.campagne[-3]+'-'+self.campagne[-2]+'-'+self.campagne[-1]
         return self.campagne             
 
     
@@ -368,8 +374,8 @@ class WitbeLogFile(object):
             self.scenario_failed = ""  
 
         mesure_fields = {"fields":{"nom":self.mesure, "code_erreur":self.error_code,"scenario":[self.scenario],\
-                "test":[self.test],"principale":None,"resultat_test":self.resultat, "scenario_failed":self.scenario_failed,"date_fin":self.date_debut,"version":[self.version],\
-                "video_report":self.video_report, "campagne":[self.date_debut], "file_report":self.filename, "date_debut":self.date_debut}, "model":"stbattack.mesure", "pk":pk}
+                "test":[self.test],"principal":self.test_principal,"resultat_test":self.resultat, "scenario_failed":self.scenario_failed,"date_fin":self.date_debut,"version":[self.version],\
+                "is_principal":self.test_is_principal,"video_report":self.video_report, "campagne":[self.date_debut], "file_report":self.filename, "date_debut":self.date_debut}, "model":"stbattack.mesure", "pk":pk}
 
         mesure_fields = json.dumps(mesure_fields)
         data = '['+ mesure_fields +']'
