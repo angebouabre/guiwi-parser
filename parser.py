@@ -12,9 +12,19 @@ from parsersettings import *
 
 #TODO Use re to parse some expressions
 
+def genFixture(output_file, data):
+    if not os.path.isfile(output_file):  
+        print output_file
+        f = open(output_file,'w')
+        f.write(data)
+        f.close()
+    #else:
+    #    print "Fichier déja parsé"
+    return True
+
 class WitbeLogFile(object):
     """ Class of logsTM files """
-    def __init__(self, filename, pk_campagne, pk_mesure, pk_scenario, pk_test, pk_theme):
+    def __init__(self, filename):
         
         self.filename = filename #filename's Full path
         self.tag = filename.split('-')[-1].split('.')[0]
@@ -50,13 +60,13 @@ class WitbeLogFile(object):
         
         self.date_debut_tests = self.getDateDebutTests()
         ####### Get tables fields #######
-        self.projet_fields = self.serialize_projet(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.campagne_fields = self.serialize_campagne(pk_campagne) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.version_fields = self.serialize_version(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.scenario_fields = self.serialize_scenario(pk_scenario) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.theme_fields = self.serialize_theme(pk_theme) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.test_fields = self.serialize_test(pk_test) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
-        self.mesure_fields = self.serialize_mesure(pk_mesure) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        #self.projet_fields = self.serialize_projet(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        #self.campagne_fields = self.serialize_campagne(pk_campagne) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        #self.version_fields = self.serialize_version(1) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        #self.scenario_fields = self.serialize_scenario(pk_scenario) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        #self.theme_fields = self.serialize_theme(pk_theme) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        #self.test_fields = self.serialize_test(pk_test) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
+        #self.mesure_fields = self.serialize_mesure(pk_mesure) #TODO Remove hard pk=1 in pamameter and use the method get_last_pk in utils to get lask pk+1 from database
       
 
     def checkFile(self):
@@ -239,11 +249,7 @@ class WitbeLogFile(object):
         
         output_file = "fixture/projet_%s.json" %self.projet
         
-        if not os.path.isfile(output_file):  
-            print output_file
-            f = open(output_file,'w')
-            f.write(data)
-            f.close()
+        genFixture(output_file, data)
         return data 
 
     def serialize_campagne(self, pk):
@@ -258,11 +264,7 @@ class WitbeLogFile(object):
         
         output_file = "fixture/campagne_du_%s.json" %self.campagne
         
-        if not os.path.isfile(output_file):  
-            print output_file
-            f = open(output_file,'w')
-            f.write(data)
-            f.close()
+        genFixture(output_file, data)
         return data 
 
     def serialize_version(self, pk):
@@ -277,11 +279,8 @@ class WitbeLogFile(object):
         
         output_file = "fixture/version_%s.json" %self.version
         
-        if not os.path.isfile(output_file):  
-            print output_file
-            f = open(output_file,'w')
-            f.write(data)
-            f.close()
+        genFixture(output_file, data)
+        return data 
     
     def serialize_scenario(self, pk):
         """ This method generate the scenario's fixture file"""
@@ -295,11 +294,7 @@ class WitbeLogFile(object):
         
         output_file = "fixture/scenario_%s.json" %self.scenario
         
-        if not os.path.isfile(output_file):  
-            print output_file
-            f = open(output_file,'w')
-            f.write(data)
-            f.close()
+        genFixture(output_file, data)
         return data 
     
    
@@ -315,12 +310,7 @@ class WitbeLogFile(object):
         
         output_file = "fixture/theme_%s.json" %self.theme
         
-        if not os.path.isfile(output_file):  
-            print output_file
-            f = open(output_file,'w')
-            f.write(data)
-            f.close()
-        
+        genFixture(output_file, data)
         return data 
 
     def serialize_test(self, pk):
@@ -335,12 +325,7 @@ class WitbeLogFile(object):
         
         output_file = "fixture/test_%s.json" %self.test
         
-        if not os.path.isfile(output_file):  
-            print output_file
-            f = open(output_file,'w')
-            f.write(data)
-            f.close()
-        
+        genFixture(output_file, data)
         return data 
 
     
@@ -382,11 +367,7 @@ class WitbeLogFile(object):
         
         output_file = "fixture/mesure_%s.json" %self.mesure
         
-        if not os.path.isfile(output_file):  
-            print output_file
-            f = open(output_file,'w')
-            f.write(data)
-            f.close()
+        genFixture(output_file, data)
         return data
 
 if __name__ == '__main__':
