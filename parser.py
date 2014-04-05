@@ -18,9 +18,10 @@ def genFixture(output_file, data):
         f = open(output_file,'w')
         f.write(data)
         f.close()
-    #else:
-    #    print "Fichier déja parsé"
-    return True
+        res = True
+    else:
+        res = False
+    return res
 
 class WitbeLogFile(object):
     """ Class of logsTM files """
@@ -249,8 +250,8 @@ class WitbeLogFile(object):
         
         output_file = "fixture/projet_%s.json" %self.projet
         
-        genFixture(output_file, data)
-        return data 
+        res = genFixture(output_file, data)
+        return res 
 
     def serialize_campagne(self, pk):
         """ This method generate the campagne's fixture file"""
@@ -264,8 +265,8 @@ class WitbeLogFile(object):
         
         output_file = "fixture/campagne_du_%s.json" %self.campagne
         
-        genFixture(output_file, data)
-        return data 
+        res = genFixture(output_file, data)
+        return res 
 
     def serialize_version(self, pk):
         """ This method generate the version's fixture file"""
@@ -279,8 +280,8 @@ class WitbeLogFile(object):
         
         output_file = "fixture/version_%s.json" %self.version
         
-        genFixture(output_file, data)
-        return data 
+        res = genFixture(output_file, data)
+        return res 
     
     def serialize_scenario(self, pk):
         """ This method generate the scenario's fixture file"""
@@ -294,8 +295,8 @@ class WitbeLogFile(object):
         
         output_file = "fixture/scenario_%s.json" %self.scenario
         
-        genFixture(output_file, data)
-        return data 
+        res = genFixture(output_file, data)
+        return res 
     
    
     def serialize_theme(self, pk):
@@ -310,8 +311,8 @@ class WitbeLogFile(object):
         
         output_file = "fixture/theme_%s.json" %self.theme
         
-        genFixture(output_file, data)
-        return data 
+        res = genFixture(output_file, data)
+        return res 
 
     def serialize_test(self, pk):
         """ This method generate the test's fixture file"""
@@ -325,8 +326,8 @@ class WitbeLogFile(object):
         
         output_file = "fixture/test_%s.json" %self.test
         
-        genFixture(output_file, data)
-        return data 
+        res = genFixture(output_file, data)
+        return res 
 
     
     def serialize_mesure(self, pk):
@@ -367,8 +368,8 @@ class WitbeLogFile(object):
         
         output_file = "fixture/mesure_%s.json" %self.mesure
         
-        genFixture(output_file, data)
-        return data
+        res = genFixture(output_file, data)
+        return res 
 
 if __name__ == '__main__':
     dossier = '/home/bouable/workspace/project/sfr/neufbox-evol/integration/testi/fusion/13.2.20/2014/3/18/'
