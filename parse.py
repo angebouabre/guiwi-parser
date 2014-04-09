@@ -3,13 +3,14 @@ import os
 import shutil
     
     
-dossier = '/home/bouable/sfr-workspace/fusion/13.2.20/2014/3/31'
+dossier = '/home/bouable/sfr-workspace/fusion/13.2.19/2014/3/6'
 
 pk_scenario = 1
+pk_version = 2
 pk_theme = 1
 pk_test = 1
-pk_campagne = 15 
-pk_mesure = 2003  
+pk_campagne = 9 
+pk_mesure = 2312  
 
 tab_campagne = []
 tab_scenario = []
@@ -21,6 +22,7 @@ for fic in os.listdir(dossier):
     fic = os.path.join(dossier,fic)
     f = WitbeLogFile(fic)
     res_campagne = f.serialize_campagne(pk_campagne)
+    res_version = f.serialize_version(pk_version)
     if res_campagne == True:
         pk_campagne += 1
         tab_campagne.append(pk_campagne)

@@ -3,14 +3,14 @@
 
 count=0
 
-mkdir -p principal 
+mkdir -p fixture/principal 
 
-for file in $( ls -1p *wrs.json )
+for file in $( ls -1p fixture/*wrs.json )
 do
     grep '"is_principal": true' ${file}
     if [[ $? -eq 0 ]]; then
 	printf ">>> Move %s\n" ${file}
-	mv ${file} principal
+	mv ${file} fixture/principal
 	count=$((count + 1))
     fi
 done
