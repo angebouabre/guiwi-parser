@@ -3,6 +3,7 @@
 
 import os, sys
 import sqlite3
+import psycopg2
 from datetime import datetime
 from parsersettings import LOG_DIR
 
@@ -37,10 +38,21 @@ def get_daily_wrs_results(raw_wrs):
                     wrs_folders.append(day_folder)
     return wrs_folders
 
-def get_last_pk(db):
+def get_last_pk_sqlite(db):
     conn = sqlite3.connect(db)
     c = conn.cursor()
     c.execute("select count () from stbattack_tasktest")
     val = c.fetchone()
     val = val[0]
+    return val
+
+
+def get_last_pk_pg(db, user, table):
+    connection = "dbname=%s user=%s" %(db, user)
+    conn = psycopg2.connect(connection)
+    c = conn.cursor()
+    query = "select id from %s order by id" %table
+    c.execute(query)
+    val = c.fetchall()
+    val = val[-1][0]
     return val

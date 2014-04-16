@@ -1,17 +1,35 @@
 from parser import *
 import os
 import shutil
+from utils import *
+from parsersettings import *
+from datetime import date, timedelta
+
+db = "ti_database"
+user = "bouable"
+
+tb_projet = "stbattack_projet"
+tb_version = "stbattack_version"
+tb_campagne = "stbattack_campagne"
+tb_scenario = "stbattack_scenario"
+tb_theme = "stbattack_theme"
+tb_test = "stbattack_test"
+tb_mesure = "stbattack_mesure"
+
+pk = get_last_pk_pg
+
+yest = date.today() - timedelta(days=1)
+yest = yest.strftime("%m/%d").replace("0","")
     
-    
-dossier = '/home/bouable/workspace/project/sfr/neufbox-evol/integration/testi/fusion/14.1.2/2014/4/13/'
+dossier = '/home/bouable/workspace/project/sfr/neufbox-evol/integration/testi/fusion/14.1.2/2014/%s' % yest
 
 #TODO Get the last pk in database fo fill these initials values
-pk_scenario = 1
-pk_version = 2
-pk_theme = 1
-pk_test = 1
-pk_campagne = 15 
-pk_mesure = 9150  
+pk_scenario = pk(db, user, tb_scenario) + 1
+pk_version = pk(db, user, tb_version) + 1
+pk_theme = pk(db, user, tb_theme) + 1
+pk_test = pk(db, user, tb_test) + 1
+pk_campagne = pk(db, user, tb_campagne) + 1 
+pk_mesure = pk(db, user, tb_mesure) + 1 
 
 for fic in os.listdir(dossier):
     fic = os.path.join(dossier,fic)
