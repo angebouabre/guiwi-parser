@@ -38,12 +38,13 @@ def get_daily_wrs_results(raw_wrs):
                     wrs_folders.append(day_folder)
     return wrs_folders
 
-def get_last_pk_sqlite(db):
+def get_last_pk_sqlite(db, table):
     conn = sqlite3.connect(db)
     c = conn.cursor()
-    c.execute("select count () from stbattack_tasktest")
-    val = c.fetchone()
-    val = val[0]
+    query = "select id from %s order by id" %table
+    c.execute(query)
+    val = c.fetchall()
+    val = val[-1][0]
     return val
 
 
