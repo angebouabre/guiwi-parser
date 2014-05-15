@@ -5,8 +5,7 @@ from utils import *
 from parsersettings import *
 from datetime import date, timedelta
 
-db = "/home/bouable/workspace/project/sfr/neufbox-evol/integration/testi/guiwi/witbe/ti.db"
-user = "bouable"
+db = DATABASE
 
 tb_projet = "stbattack_projet"
 tb_version = "stbattack_version"
@@ -21,9 +20,13 @@ pk = get_last_pk_sqlite
 yest = date.today() - timedelta(days=1)
 yest = yest.strftime("%m/%d").replace("0","")
 
-yest = "4/29"
+projet = "fusion"
+version = "13.2.20"
+date = "2014/4/30"
 
-dossier = '/home/bouable/workspace/project/sfr/neufbox-evol/integration/testi/fusion/14.1.2/2014/%s' % yest
+yest = "%s/%s/%s" %(projet, version, date)
+
+dossier = os.path.join(RAW_RESULTS_DIR, yest)
 
 #TODO Get the last pk in database fo fill these initials values
 pk_scenario = pk(db, tb_scenario) + 1
